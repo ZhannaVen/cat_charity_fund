@@ -4,9 +4,10 @@ from fastapi import APIRouter, HTTPException, Depends
 
 from app.crud.charity_project import create_charity_project
 from app.schemas.charity_project import CharityProjectCreate, CharityProjectDB, CharityProjectUpdate
-from app.crud.charity_project import create_charity_project, get_project_id_by_name, read_all_projects_from_db, get_charity_project_by_id, update_charity_project
+from app.crud.charity_project import create_charity_project, get_project_id_by_name, read_all_projects_from_db, get_charity_project_by_id, update_charity_project, delete_charity_project
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_async_session
+from app.models.charity_project import CharityProject
 
 
 router = APIRouter(
@@ -51,18 +52,31 @@ async def partially_update_meeting_room(
         obj_in: CharityProjectUpdate,
         session: AsyncSession = Depends(get_async_session),
 ):
-    charity_project = await get_charity_project_by_id(
+    charity_project = await check_charity_project_exists(
         charity_project_id, session
     )
-    if charity_project is None:
-        raise HTTPException(
-            status_code=404, 
-            detail='Проект не найден!'
-        )
     if obj_in.name is not None:
         await check_name_duplicate(obj_in.name, session)
     charity_project = await update_charity_project(
         charity_project, obj_in, session
+    )
+    return charity_project
+
+
+@router.delete(
+    '/{charity_project_id}',
+    response_model=CharityProjectDB,
+    response_model_exclude_none=True,
+)
+async def remove_charity_project(
+        charity_project_id: int,
+        session: AsyncSession = Depends(get_async_session),
+):
+    charity_project = await check_charity_project_exists(
+        charity_project_id, session
+    )
+    charity_project = await delete_charity_project(
+        charity_project, session
     )
     return charity_project
 
@@ -76,4 +90,19 @@ async def check_name_duplicate(
         raise HTTPException(
             status_code=422,
             detail='Проект с таким именем уже существует!',
-        ) 
+        )
+
+
+async def check_charity_project_exists(
+        charity_project_id: int,
+        session: AsyncSession,
+) -> CharityProject:
+    charity_project = await get_charity_project_by_id(
+        charity_project_id, session
+    )
+    if charity_project is None:
+        raise HTTPException(
+            status_code=404,
+            detail='Проект не найден!'
+        )
+    return charity_project
