@@ -34,5 +34,12 @@ async def get_project_id_by_name(
     return db_project_id
 
 
+async def read_all_projects_from_db(
+        session: AsyncSession,
+) -> list[CharityProject]:
+    db_projects = await session.execute(select(CharityProject))
+    return db_projects.scalars().all()
+
+
 
 
