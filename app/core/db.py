@@ -13,6 +13,7 @@ class PreBase:
 
     id = Column(Integer, primary_key=True)
 
+
 Base = declarative_base(cls=PreBase)
 
 engine = create_async_engine(settings.database_url)
