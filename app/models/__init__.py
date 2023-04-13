@@ -1,4 +1,4 @@
-from .charity_project import CharityProject
-from .user import User
 from .abstract import AbstractModel
+from .charity_project import CharityProject
 from .donation import Donation
+from .user import User

@@ -1,8 +1,7 @@
 
-from pydantic import Field, PositiveInt, BaseModel, Extra, validator
+from pydantic import BaseModel, Extra, Field, PositiveInt, validator
 
 from app.schemas.abstract import AbstractSchema
-
 
 INVALID_VALUE = 'Поле не может быть пустым!'
 
