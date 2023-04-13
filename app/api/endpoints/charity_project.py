@@ -1,12 +1,11 @@
-# app/api/meeting_room.py
-
 from fastapi import APIRouter, Depends
-
 from app.schemas.charity_project import CharityProjectCreate, CharityProjectDB, CharityProjectUpdate
 from app.crud.charity_project import charity_project_crud
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_async_session
-from app.api.validators import check_charity_project_exists, check_name_duplicate
+from app.api.validators import check_charity_project_exists, check_name_duplicate, check_charity_project_is_closed, check_charity_project_is_opened
+from app.core.user import current_superuser
+from app.services.investments import distribution_of_investments
 
 
 router = APIRouter()
@@ -16,6 +15,7 @@ router = APIRouter()
     '/',
     response_model=CharityProjectDB,
     response_model_exclude_none=True,
+    dependencies=[Depends(current_superuser)],
 )
 async def create_new_charity_project(
         charity_project: CharityProjectCreate,
@@ -23,6 +23,7 @@ async def create_new_charity_project(
 ):
     await check_name_duplicate(charity_project.name, session)
     new_project = await charity_project_crud.create(charity_project, session)
+    new_project = await distribution_of_investments(new_project, session)
     return new_project
 
 
@@ -41,9 +42,9 @@ async def get_all_charity_projects(
 @router.patch(
     '/{charity_project_id}',
     response_model=CharityProjectDB,
-    response_model_exclude_none=True,
+    dependencies=[Depends(current_superuser)],
 )
-async def partially_update_meeting_room(
+async def partially_update_charity_project(
         charity_project_id: int,
         obj_in: CharityProjectUpdate,
         session: AsyncSession = Depends(get_async_session),
@@ -53,6 +54,7 @@ async def partially_update_meeting_room(
     )
     if obj_in.name is not None:
         await check_name_duplicate(obj_in.name, session)
+    await check_charity_project_is_closed(charity_project_id, session)
     charity_project = await charity_project_crud.update(
         charity_project, obj_in, session
     )
@@ -62,7 +64,7 @@ async def partially_update_meeting_room(
 @router.delete(
     '/{charity_project_id}',
     response_model=CharityProjectDB,
-    response_model_exclude_none=True,
+    dependencies=[Depends(current_superuser)]
 )
 async def remove_charity_project(
         charity_project_id: int,
@@ -71,6 +73,7 @@ async def remove_charity_project(
     charity_project = await check_charity_project_exists(
         charity_project_id, session
     )
+    await check_charity_project_is_opened(charity_project_id, session)
     charity_project = await charity_project_crud.remove(
         charity_project, session
     )

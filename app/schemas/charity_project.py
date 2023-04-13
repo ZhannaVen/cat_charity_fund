@@ -10,7 +10,7 @@ INVALID_VALUE = 'Поле не может быть пустым!'
 class CharityProjectCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
     description: str = Field(..., min_length=1)
-    full_amount: PositiveInt
+    full_amount: PositiveInt = Field(..., example=1000)
 
 
 class CharityProjectDB(CharityProjectCreate, AbstractSchema):

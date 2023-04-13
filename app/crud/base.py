@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy import select
@@ -17,17 +17,28 @@ class CRUDBase:
         obj_in_data = obj_in.dict()
         if user is not None:
             obj_in_data["user_id"] = user.id
+            
         db_obj = self.model(**obj_in_data)
-
         session.add(db_obj)
         await session.commit()
         await session.refresh(db_obj)
-
         return db_obj
 
     async def get(self, obj_id: int, session: AsyncSession):
         db_obj = await session.execute(
             select(self.model).where(self.model.id == obj_id)
+        )
+        return db_obj.scalars().first()
+    
+    async def get_by_attribute(
+            self,
+            attr_name: str,
+            attr_value: Union[str, int],
+            session: AsyncSession,
+    ):
+        attr = getattr(self.model, attr_name)
+        db_obj = await session.execute(
+            select(self.model).where(attr == attr_value)
         )
         return db_obj.scalars().first()
 
@@ -61,7 +72,7 @@ class CRUDBase:
     ):
         await session.delete(db_obj)
         await session.commit()
-
+        
         return db_obj
 
 
