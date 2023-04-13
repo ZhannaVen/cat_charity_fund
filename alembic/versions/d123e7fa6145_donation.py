@@ -1,8 +1,8 @@
-"""Donation Model was added
+"""Donation
 
-Revision ID: fc34d6779c8d
-Revises: 8daf4184366d
-Create Date: 2023-04-13 11:08:21.426401
+Revision ID: d123e7fa6145
+Revises: 0bfc6f808816
+Create Date: 2023-04-13 11:42:23.631582
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'fc34d6779c8d'
-down_revision = '8daf4184366d'
+revision = 'd123e7fa6145'
+down_revision = '0bfc6f808816'
 branch_labels = None
 depends_on = None
 
@@ -26,6 +26,8 @@ def upgrade():
     sa.Column('create_date', sa.DateTime(), nullable=True),
     sa.Column('close_date', sa.DateTime(), nullable=True),
     sa.Column('comment', sa.Text(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

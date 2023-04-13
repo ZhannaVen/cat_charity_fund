@@ -5,8 +5,6 @@ from app.schemas.abstract import AbstractSchema
 
 
 INVALID_VALUE = 'Поле не может быть пустым!'
-POSITIVE_VALUE = 'Значение должно быть больше нуля'
-
 
 
 class CharityProjectCreate(BaseModel):

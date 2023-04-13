@@ -2,9 +2,8 @@
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from app.crud.charity_project import create_charity_project
 from app.schemas.charity_project import CharityProjectCreate, CharityProjectDB, CharityProjectUpdate
-from app.crud.charity_project import create_charity_project, get_project_id_by_name, read_all_projects_from_db, get_charity_project_by_id, update_charity_project, delete_charity_project
+from app.crud.charity_project import charity_project_crud
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_async_session
 from app.models.charity_project import CharityProject
@@ -26,7 +25,7 @@ async def create_new_charity_project(
         session: AsyncSession = Depends(get_async_session),
 ):
     await check_name_duplicate(charity_project.name, session)
-    new_project = await create_charity_project(charity_project, session)
+    new_project = await charity_project_crud.create(charity_project, session)
     return new_project
 
 
@@ -38,7 +37,7 @@ async def create_new_charity_project(
 async def get_all_charity_projects(
         session: AsyncSession = Depends(get_async_session),
 ):
-    all_projects = await read_all_projects_from_db(session)
+    all_projects = await charity_project_crud.get_multi(session)
     return all_projects
 
 
@@ -57,7 +56,7 @@ async def partially_update_meeting_room(
     )
     if obj_in.name is not None:
         await check_name_duplicate(obj_in.name, session)
-    charity_project = await update_charity_project(
+    charity_project = await charity_project_crud.update(
         charity_project, obj_in, session
     )
     return charity_project
@@ -75,7 +74,7 @@ async def remove_charity_project(
     charity_project = await check_charity_project_exists(
         charity_project_id, session
     )
-    charity_project = await delete_charity_project(
+    charity_project = await charity_project_crud.remove(
         charity_project, session
     )
     return charity_project
@@ -85,7 +84,7 @@ async def check_name_duplicate(
         project_name: str,
         session: AsyncSession,
 ) -> None:
-    project_id = await get_project_id_by_name(project_name, session)
+    project_id = await charity_project_crud.get_project_id_by_name(project_name, session)
     if project_id is not None:
         raise HTTPException(
             status_code=422,
@@ -97,7 +96,7 @@ async def check_charity_project_exists(
         charity_project_id: int,
         session: AsyncSession,
 ) -> CharityProject:
-    charity_project = await get_charity_project_by_id(
+    charity_project = await charity_project_crud.get(
         charity_project_id, session
     )
     if charity_project is None:
