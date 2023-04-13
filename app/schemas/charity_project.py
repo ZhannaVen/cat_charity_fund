@@ -3,6 +3,7 @@ from pydantic import BaseModel, Extra, Field, PositiveInt, validator
 
 from app.schemas.abstract import AbstractSchema
 
+
 INVALID_VALUE = 'Поле не может быть пустым!'
 
 
@@ -19,7 +20,7 @@ class CharityProjectDB(CharityProjectCreate, AbstractSchema):
         orm_mode = True
 
 
-class CharityProjectUpdate(CharityProjectCreate):
+class CharityProjectUpdate(BaseModel):
     name: str = Field(None, min_length=1, max_length=100)
     description: str = Field(None, min_length=1)
     full_amount: PositiveInt = Field(None)
