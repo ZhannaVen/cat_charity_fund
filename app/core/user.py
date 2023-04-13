@@ -15,6 +15,10 @@ from app.core.db import get_async_session
 from app.models.user import User
 from app.schemas.user import UserCreate
 
+INVALID_PASSWORD = 'Password should be at least 3 characters'
+INVALID_PASSWORD_EMAIL = 'Password should not contain e-mail'
+USER_REGISTRATION = 'Пользователь {} зарегистрирован.'
+
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
     yield SQLAlchemyUserDatabase(session, User)
@@ -42,17 +46,17 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
     ) -> None:
         if len(password) < 3:
             raise InvalidPasswordException(
-                reason='Password should be at least 3 characters'
+                reason=INVALID_PASSWORD
             )
         if user.email in password:
             raise InvalidPasswordException(
-                reason='Password should not contain e-mail'
+                reason=INVALID_PASSWORD_EMAIL
             )
 
     async def on_after_register(
             self, user: User, request: Optional[Request] = None
     ):
-        print(f'Пользователь {user.email} зарегистрирован.')
+        print(USER_REGISTRATION.format(user.email))
 
 
 async def get_user_manager(user_db=Depends(get_user_db)):

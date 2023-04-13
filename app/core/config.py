@@ -1,4 +1,3 @@
-# app/core/config.py
 from pydantic import BaseSettings, EmailStr
 from typing import Optional
 
@@ -15,4 +14,4 @@ class Settings(BaseSettings):
         env_file = '.env'
 
 
-settings = Settings()        
+settings = Settings()
