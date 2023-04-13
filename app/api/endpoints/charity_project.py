@@ -1,18 +1,15 @@
 # app/api/meeting_room.py
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends
 
 from app.schemas.charity_project import CharityProjectCreate, CharityProjectDB, CharityProjectUpdate
 from app.crud.charity_project import charity_project_crud
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.db import get_async_session
-from app.models.charity_project import CharityProject
+from app.api.validators import check_charity_project_exists, check_name_duplicate
 
 
-router = APIRouter(
-    prefix='/charity_project',
-    tags=['Charity Projects']
-)
+router = APIRouter()
 
 
 @router.post(
@@ -77,31 +74,4 @@ async def remove_charity_project(
     charity_project = await charity_project_crud.remove(
         charity_project, session
     )
-    return charity_project
-
-
-async def check_name_duplicate(
-        project_name: str,
-        session: AsyncSession,
-) -> None:
-    project_id = await charity_project_crud.get_project_id_by_name(project_name, session)
-    if project_id is not None:
-        raise HTTPException(
-            status_code=422,
-            detail='Проект с таким именем уже существует!',
-        )
-
-
-async def check_charity_project_exists(
-        charity_project_id: int,
-        session: AsyncSession,
-) -> CharityProject:
-    charity_project = await charity_project_crud.get(
-        charity_project_id, session
-    )
-    if charity_project is None:
-        raise HTTPException(
-            status_code=404,
-            detail='Проект не найден!'
-        )
     return charity_project
