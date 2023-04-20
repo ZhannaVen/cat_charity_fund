@@ -12,6 +12,7 @@ from app.schemas.charity_project import (CharityProjectCreate,
                                          CharityProjectDB,
                                          CharityProjectUpdate)
 from app.services.investments import distribution_of_investments
+from app.models import CharityProject, Donation
 
 router = APIRouter()
 
@@ -28,7 +29,14 @@ async def create_new_charity_project(
 ):
     await check_name_duplicate(charity_project.name, session)
     new_project = await charity_project_crud.create(charity_project, session)
-    new_project = await distribution_of_investments(new_project, session)
+    db_model = (
+        CharityProject if isinstance(new_project, Donation) else Donation
+    )
+    open_objects = await charity_project_crud.get_underinvested_objects(db_model, session)
+    if open_objects:
+        new_project, open_objects = distribution_of_investments(new_project, open_objects)
+    await session.commit()
+    await session.refresh(new_project)
     return new_project
 
 

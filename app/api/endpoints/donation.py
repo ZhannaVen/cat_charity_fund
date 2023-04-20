@@ -7,6 +7,9 @@ from app.crud.donation import donation_crud
 from app.models import User
 from app.schemas.donation import AllDonations, DonationBase, DonationDB
 from app.services.investments import distribution_of_investments
+from app.models import CharityProject, Donation
+from sqlalchemy import select
+from sqlalchemy.sql.expression import false
 
 router = APIRouter()
 
@@ -32,7 +35,14 @@ async def create_donation(
     user: User = Depends(current_user),
 ):
     new_donation = await donation_crud.create(donation, session, user)
-    new_donation = await distribution_of_investments(new_donation, session)
+    db_model = (
+        CharityProject if isinstance(new_donation, Donation) else Donation
+    )
+    open_objects = await donation_crud.get_underinvested_objects(db_model, session)
+    if open_objects:
+        new_donation, open_objects = distribution_of_investments(new_donation, open_objects)
+    await session.commit()
+    await session.refresh(new_donation)
     return new_donation
 
 
