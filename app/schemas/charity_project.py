@@ -1,5 +1,5 @@
 
-from pydantic import BaseModel, Extra, Field, PositiveInt, validator
+from pydantic import Extra, Field, PositiveInt, validator
 
 from app.core.config import Model
 from app.schemas.abstract import AbstractSchema

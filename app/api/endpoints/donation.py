@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.sql.expression import false
 
 from app.core.db import get_async_session
 from app.core.user import current_superuser, current_user
