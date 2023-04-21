@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import Set, List
+from typing import List, Set
+
 from app.core.db import Base
 
 

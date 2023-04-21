@@ -8,11 +8,11 @@ from app.api.validators import (check_charity_project_exists,
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charity_project_crud
+from app.models import CharityProject, Donation
 from app.schemas.charity_project import (CharityProjectCreate,
                                          CharityProjectDB,
                                          CharityProjectUpdate)
 from app.services.investments import distribution_of_investments
-from app.models import CharityProject, Donation
 
 router = APIRouter()
 

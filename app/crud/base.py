@@ -1,15 +1,13 @@
 from typing import Generic, List, Optional, Type, TypeVar, Union
 
 from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from app.models.user import User
-from pydantic import BaseModel
-from app.core.db import Base
 from sqlalchemy.sql.expression import false
-from sqlalchemy import select
 
+from app.core.db import Base
+from app.models.user import User
 
 ModelType = TypeVar('ModelType', bound=Base)
 CreateSchemaType = TypeVar('CreateSchemaType', bound=BaseModel)

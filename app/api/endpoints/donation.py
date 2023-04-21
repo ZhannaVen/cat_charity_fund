@@ -1,15 +1,14 @@
 from fastapi import APIRouter, Depends
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.expression import false
 
 from app.core.db import get_async_session
 from app.core.user import current_superuser, current_user
 from app.crud.donation import donation_crud
-from app.models import User
+from app.models import CharityProject, Donation, User
 from app.schemas.donation import AllDonations, DonationBase, DonationDB
 from app.services.investments import distribution_of_investments
-from app.models import CharityProject, Donation
-from sqlalchemy import select
-from sqlalchemy.sql.expression import false
 
 router = APIRouter()
 
