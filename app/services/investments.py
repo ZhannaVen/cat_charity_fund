@@ -1,36 +1,27 @@
 from datetime import datetime
-from typing import Union
-
-
-from app.models import CharityProject, Donation
-
-
-def close_invested_object(
-    object_to_close: Union[CharityProject, Donation],
-) -> None:
-    object_to_close.fully_invested = True
-    object_to_close.close_date = datetime.now()
+from typing import Set, List
+from app.core.db import Base
 
 
 def distribution_of_investments(
-    object_in: Union[CharityProject, Donation],
-    open_objects,
-
-):
-    for object in open_objects:
-        object_investments = object.full_amount - object.invested_amount
-        object_in_investments = object_in.full_amount
+    target: Base,
+    sources: List[Base],
+) -> Set:
+    if target.invested_amount is None:
+        target.invested_amount = 0
+    target_investments = target.full_amount
+    changed_sources = set()
+    for source in sources:
+        source_investments = source.full_amount - source.invested_amount
         to_invest = (
-            object_investments if object_investments < object_in_investments else object_in_investments
+            source_investments if source_investments < target_investments else target_investments
         )
-        object.invested_amount += to_invest
-        object_in.invested_amount += to_invest
-        object_in_investments -= to_invest
-
-        if object.full_amount == object.invested_amount:
-            close_invested_object(object)
-
-        if not object_in_investments:
-            close_invested_object(object_in)
+        for changed_source in (source, target):
+            changed_source.invested_amount += to_invest
+            if changed_source.full_amount == changed_source.invested_amount:
+                changed_source.fully_invested = True
+                changed_source.close_date = datetime.now()
+        changed_sources.add(source)
+        if target.fully_invested is True:
             break
-    return object_in, open_objects
+    return changed_sources

@@ -34,13 +34,14 @@ async def create_donation(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_user),
 ):
-    new_donation = await donation_crud.create(donation, session, user)
+    new_donation = await donation_crud.create(donation, session, user, commit=False)
     db_model = (
         CharityProject if isinstance(new_donation, Donation) else Donation
     )
-    open_objects = await donation_crud.get_underinvested_objects(db_model, session)
-    if open_objects:
-        new_donation, open_objects = distribution_of_investments(new_donation, open_objects)
+    sources = await donation_crud.get_underinvested_objects(db_model, session)
+    if sources:
+        changed_sources = distribution_of_investments(new_donation, sources)
+        session.add_all(changed_sources)
     await session.commit()
     await session.refresh(new_donation)
     return new_donation

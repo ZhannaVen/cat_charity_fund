@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseSettings, EmailStr
+from pydantic import BaseSettings, EmailStr, BaseModel
 
 
 class Settings(BaseSettings):
@@ -16,3 +16,12 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+class Model(BaseModel):
+
+    class Config:
+        min_anystr_length = 1
+        error_msg_templates = {
+            'value_error.any_str.min_length': 'min_length:{limit_value}',
+        }

@@ -28,13 +28,14 @@ async def create_new_charity_project(
         session: AsyncSession = Depends(get_async_session),
 ):
     await check_name_duplicate(charity_project.name, session)
-    new_project = await charity_project_crud.create(charity_project, session)
+    new_project = await charity_project_crud.create(charity_project, session, user=None, commit=False)
     db_model = (
         CharityProject if isinstance(new_project, Donation) else Donation
     )
-    open_objects = await charity_project_crud.get_underinvested_objects(db_model, session)
-    if open_objects:
-        new_project, open_objects = distribution_of_investments(new_project, open_objects)
+    sources = await charity_project_crud.get_underinvested_objects(db_model, session)
+    if sources:
+        changed_sources = distribution_of_investments(new_project, sources)
+        session.add_all(changed_sources)
     await session.commit()
     await session.refresh(new_project)
     return new_project
