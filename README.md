@@ -56,7 +56,7 @@ alembic upgrade head
 ```
 - To start a project:
 ```bash
-uvicorn app.main:app --reload
+uvicorn app.main:app
 ```
 
 ## Author
