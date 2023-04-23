@@ -1,21 +1,20 @@
 from datetime import datetime
-from typing import List, Set
+from typing import List, Union
 
-from app.core.db import Base
+from app.models import Donation, CharityProject
 
 
 def distribution_of_investments(
-    target: Base,
-    sources: List[Base],
-) -> Set:
+    target: Union[CharityProject, Donation],
+    sources: List[Union[CharityProject, Donation]],
+) -> List[Union[CharityProject, Donation]]:
     if target.invested_amount is None:
         target.invested_amount = 0
-    target_investments = target.full_amount
     changed_sources = set()
     for source in sources:
-        source_investments = source.full_amount - source.invested_amount
-        to_invest = (
-            source_investments if source_investments < target_investments else target_investments
+        to_invest = min(
+            source.full_amount - source.invested_amount,
+            target.full_amount - target.invested_amount
         )
         for changed_source in (source, target):
             changed_source.invested_amount += to_invest

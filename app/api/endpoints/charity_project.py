@@ -8,7 +8,7 @@ from app.api.validators import (check_charity_project_exists,
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charity_project_crud
-from app.models import CharityProject, Donation
+from app.models import Donation
 from app.schemas.charity_project import (CharityProjectCreate,
                                          CharityProjectDB,
                                          CharityProjectUpdate)
@@ -28,14 +28,20 @@ async def create_new_charity_project(
         session: AsyncSession = Depends(get_async_session),
 ):
     await check_name_duplicate(charity_project.name, session)
-    new_project = await charity_project_crud.create(charity_project, session, user=None, commit=False)
-    db_model = (
-        CharityProject if isinstance(new_project, Donation) else Donation
+    new_project = await charity_project_crud.create(
+        charity_project,
+        session,
+        commit=False
     )
-    sources = await charity_project_crud.get_underinvested_objects(db_model, session)
-    if sources:
-        changed_sources = distribution_of_investments(new_project, sources)
-        session.add_all(changed_sources)
+    session.add_all(
+        distribution_of_investments(
+            new_project,
+            await charity_project_crud.get_underinvested_objects(
+                Donation,
+                session
+            )
+        )
+    )
     await session.commit()
     await session.refresh(new_project)
     return new_project
