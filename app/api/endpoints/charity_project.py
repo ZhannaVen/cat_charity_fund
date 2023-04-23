@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.validators import (check_charity_project_exists,
                                 check_charity_project_is_closed,
                                 check_charity_project_is_opened,
-                                check_name_duplicate)
+                                check_name_duplicate, check_update_project_invested)
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charity_project_crud
@@ -75,6 +75,7 @@ async def partially_update_charity_project(
     if obj_in.name is not None:
         await check_name_duplicate(obj_in.name, session)
     await check_charity_project_is_closed(charity_project_id, session)
+    await check_update_project_invested(charity_project_id, session)
     charity_project = await charity_project_crud.update(
         charity_project, obj_in, session
     )

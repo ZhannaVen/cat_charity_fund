@@ -15,12 +15,10 @@ class AbstractModel(Base):
     )
     invested_amount = Column(
         Integer,
-        # локально тесты проходят, на платформе - нет
-        # sqlalchemy.exc.IntegrityError
-        #CheckConstraint(
-        #    'invested_amount <= full_amount',
-        #    name='invested_less_full_amount'
-        # ),
+        CheckConstraint(
+            'invested_amount <= full_amount',
+            name='invested_less_full_amount'
+        ),
         default=0
     )
     fully_invested = Column(Boolean, default=False)

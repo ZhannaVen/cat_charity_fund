@@ -69,3 +69,19 @@ async def check_charity_project_is_closed(
             status_code=HTTPStatus.BAD_REQUEST,
             detail=CLOSED_PROJECT
         )
+
+
+async def check_update_project_invested(
+        charity_project_id: int,
+        session: AsyncSession,
+):
+    charity_project = await charity_project_crud.get_by_attribute(
+        'id', charity_project_id, session
+    )
+    if charity_project.full_amount < charity_project.invested_amount:
+        raise HTTPException(
+            status_code=422,
+            detail='При редактировании проекта должно быть запрещено'
+                   'устанавливать требуемую сумму меньше внесённой.'
+        )
+    return charity_project
