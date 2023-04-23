@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Union
 
-from app.models import Donation, CharityProject
+from app.models import CharityProject, Donation
 
 
 def distribution_of_investments(
