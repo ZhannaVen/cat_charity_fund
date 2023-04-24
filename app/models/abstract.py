@@ -29,5 +29,6 @@ class AbstractModel(Base):
 
     def __repr__(self):
         return (
-            f'Уже инвестировано/объем инвестиций: {self.invested_amount}/{self.full_amount}. '
+            f'Уже инвестировано/объем инвестиций: '
+            f'{self.invested_amount}/{self.full_amount}. '
         )
